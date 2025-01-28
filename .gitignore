@@ -1,0 +1,16 @@
+# Binaries
+/bin/
+/pkg/
+
+# Dependency directories
+/vendor/
+
+# IDE and Editor folders
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# Generated files
+graph/generated/
