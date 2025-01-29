@@ -6,5 +6,5 @@ package graph
 import "go-graphql/graph/model"
 
 type Resolver struct {
-    Todos []*model.Todo
+	Users []*model.User
 }

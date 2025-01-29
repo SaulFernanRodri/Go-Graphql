@@ -1,13 +1,26 @@
-type Todo {
+type User {
   id: ID!
-  text: String!
-  done: Boolean!
+  name: String!
+  email: String!
+  password: String!
+  activate: Boolean!
+}
+
+input NewUserInput {
+  name: String!
+  email: String!
+  password: String!
+  activate: Boolean!
 }
 
 type Query {
-  todos: [Todo!]!
+  all: [User!]!
+  find(id: ID!): User
+  findByEmail(email: String!): User
 }
 
 type Mutation {
-  createTodo(text: String!): Todo!
+  createUser(input: NewUserInput): User!
+  updateUser(id: ID!, name: String!, email: String!): User!
+  deleteUser(id: ID!): User!
 }

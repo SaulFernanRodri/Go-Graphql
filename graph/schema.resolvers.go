@@ -8,21 +8,64 @@ import (
 	"context"
 	"fmt"
 	"go-graphql/graph/model"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, todo model.NewTodo) (*model.Todo, error) {
-	newTodo := &model.Todo{
-		ID:   fmt.Sprintf("%d", len(r.Resolver.Todos)+1),
-		Text: todo.Text,
-		Done: false,
+func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUserInput) (*model.User, error) {
+	user := &model.User{
+		ID:       fmt.Sprintf("T%d", len(r.Resolver.Users)+1),
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: hashPassword(input.Password),
+		Activate: input.Activate,
 	}
-	r.Resolver.Todos = append(r.Resolver.Todos, newTodo)
-	return newTodo, nil
+	r.Resolver.Users = append(r.Resolver.Users, user)
+	return user, nil
+}
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, name string, email string) (*model.User, error) {
+	for _, user := range r.Resolver.Users {
+		if user.ID == id {
+			user.Name = name
+			user.Email = email
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user %s not found", id)
+}
+func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
+	for i, user := range r.Resolver.Users {
+		if user.ID == id {
+			r.Resolver.Users = append(r.Resolver.Users[:i], r.Resolver.Users[i+1:]...)
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user %s not found", id)
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	return r.Resolver.Todos, nil
+// All is the resolver for the all field.
+func (r *queryResolver) All(ctx context.Context) ([]*model.User, error) {
+	return r.Resolver.Users, nil
+}
+
+// Find is the resolver for the find field.
+func (r *queryResolver) Find(ctx context.Context, id string) (*model.User, error) {
+	for _, user := range r.Resolver.Users {
+		if user.ID == id {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user %s not found", id)
+}
+
+// FindByEmail is the resolver for the findByEmail field.
+func (r *queryResolver) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	for _, user := range r.Resolver.Users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("user with email %s not found", email)
 }
 
 // Mutation returns MutationResolver implementation.
@@ -33,3 +76,11 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+func hashPassword(password string) string {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic("Error al hashear la contraseña")
+	}
+	return string(hashedPassword)
+}
