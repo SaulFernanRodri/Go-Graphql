@@ -8,21 +8,32 @@ import (
 	"context"
 	"fmt"
 	"go-graphql/graph/model"
-
-	"golang.org/x/crypto/bcrypt"
+	"go-graphql/utils"
 )
 
+// CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUserInput) (*model.User, error) {
+	hashedPassword, err := utils.HashPassword(input.Password)
+	if err != nil {
+		return nil, err
+	}
 	user := &model.User{
 		ID:       fmt.Sprintf("T%d", len(r.Resolver.Users)+1),
 		Name:     input.Name,
 		Email:    input.Email,
-		Password: hashPassword(input.Password),
+		Password: hashedPassword,
 		Activate: input.Activate,
 	}
 	r.Resolver.Users = append(r.Resolver.Users, user)
+	
+	go func() {
+		r.Resolver.UserCreated <- user
+	}()
+
 	return user, nil
 }
+
+// UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, name string, email string) (*model.User, error) {
 	for _, user := range r.Resolver.Users {
 		if user.ID == id {
@@ -33,6 +44,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, name strin
 	}
 	return nil, fmt.Errorf("user %s not found", id)
 }
+
+// DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
 	for i, user := range r.Resolver.Users {
 		if user.ID == id {
@@ -68,19 +81,20 @@ func (r *queryResolver) FindByEmail(ctx context.Context, email string) (*model.U
 	return nil, fmt.Errorf("user with email %s not found", email)
 }
 
+// UserCreated is the resolver for the userCreated field.
+func (r *subscriptionResolver) UserCreated(ctx context.Context) (<-chan *model.User, error) {
+	return r.Resolver.UserCreated, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-func hashPassword(password string) string {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		panic("Error al hashear la contraseña")
-	}
-	return string(hashedPassword)
-}
+type subscriptionResolver struct{ *Resolver }

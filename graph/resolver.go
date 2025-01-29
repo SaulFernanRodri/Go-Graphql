@@ -6,5 +6,6 @@ package graph
 import "go-graphql/graph/model"
 
 type Resolver struct {
-	Users []*model.User
+	Users        []*model.User
+	UserCreated  chan *model.User // Canal de eventos para la suscripción
 }
