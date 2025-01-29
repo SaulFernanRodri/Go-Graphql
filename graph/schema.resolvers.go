@@ -8,82 +8,71 @@ import (
 	"context"
 	"fmt"
 	"go-graphql/graph/model"
-	"go-graphql/utils"
 )
 
-// CreateUser is the resolver for the createUser field.
+// Mutation: Create a new user
 func (r *mutationResolver) CreateUser(ctx context.Context, input *model.NewUserInput) (*model.User, error) {
-	hashedPassword, err := utils.HashPassword(input.Password)
-	if err != nil {
-		return nil, err
-	}
-	user := &model.User{
-		ID:       fmt.Sprintf("T%d", len(r.Resolver.Users)+1),
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: hashedPassword,
-		Activate: input.Activate,
-	}
-	r.Resolver.Users = append(r.Resolver.Users, user)
-	
-	go func() {
-		r.Resolver.UserCreated <- user
-	}()
-
-	return user, nil
+	return r.UserResolver.CreateUser(ctx, input)
 }
 
-// UpdateUser is the resolver for the updateUser field.
+// Mutation: Update a user
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, name string, email string) (*model.User, error) {
-	for _, user := range r.Resolver.Users {
-		if user.ID == id {
-			user.Name = name
-			user.Email = email
-			return user, nil
-		}
-	}
-	return nil, fmt.Errorf("user %s not found", id)
+	return r.UserResolver.UpdateUser(ctx, id, name, email)
 }
 
-// DeleteUser is the resolver for the deleteUser field.
+// Mutation: Delete a user
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*model.User, error) {
-	for i, user := range r.Resolver.Users {
-		if user.ID == id {
-			r.Resolver.Users = append(r.Resolver.Users[:i], r.Resolver.Users[i+1:]...)
-			return user, nil
-		}
-	}
-	return nil, fmt.Errorf("user %s not found", id)
+	return r.UserResolver.DeleteUser(ctx, id)
 }
 
-// All is the resolver for the all field.
+// CreateOrder is the resolver for the createOrder field.
+func (r *mutationResolver) CreateOrder(ctx context.Context, input *model.NewOrderInput) (*model.Order, error) {
+	panic(fmt.Errorf("not implemented: CreateOrder - createOrder"))
+}
+
+// DeleteOrder is the resolver for the deleteOrder field.
+func (r *mutationResolver) DeleteOrder(ctx context.Context, id string) (*model.Order, error) {
+	panic(fmt.Errorf("not implemented: DeleteOrder - deleteOrder"))
+}
+
+// Query: Fetch all users
 func (r *queryResolver) All(ctx context.Context) ([]*model.User, error) {
-	return r.Resolver.Users, nil
+	return r.UserResolver.All(ctx)
 }
 
-// Find is the resolver for the find field.
+// Query: Find user by ID
 func (r *queryResolver) Find(ctx context.Context, id string) (*model.User, error) {
-	for _, user := range r.Resolver.Users {
-		if user.ID == id {
-			return user, nil
-		}
-	}
-	return nil, fmt.Errorf("user %s not found", id)
+	return r.UserResolver.Find(ctx, id)
 }
 
-// FindByEmail is the resolver for the findByEmail field.
+// Query: Find user by email
 func (r *queryResolver) FindByEmail(ctx context.Context, email string) (*model.User, error) {
-	for _, user := range r.Resolver.Users {
-		if user.Email == email {
-			return user, nil
-		}
-	}
-	return nil, fmt.Errorf("user with email %s not found", email)
+	return r.UserResolver.FindByEmail(ctx, email)
 }
 
-// UserCreated is the resolver for the userCreated field.
+// AllOrders is the resolver for the allOrders field.
+func (r *queryResolver) AllOrders(ctx context.Context) ([]*model.Order, error) {
+	panic(fmt.Errorf("not implemented: AllOrders - allOrders"))
+}
+
+// FindOrder is the resolver for the findOrder field.
+func (r *queryResolver) FindOrder(ctx context.Context, id string) (*model.Order, error) {
+	panic(fmt.Errorf("not implemented: FindOrder - findOrder"))
+}
+
+// FindOrderByUser is the resolver for the findOrderByUser field.
+func (r *queryResolver) FindOrderByUser(ctx context.Context, id string) ([]*model.Order, error) {
+	panic(fmt.Errorf("not implemented: FindOrderByUser - findOrderByUser"))
+}
+
+// Subscription: Listen for new users
 func (r *subscriptionResolver) UserCreated(ctx context.Context) (<-chan *model.User, error) {
-	return r.Resolver.UserCreated, nil
+	return r.UserResolver.UserCreated(ctx)
+}
+
+// OrderCreated is the resolver for the orderCreated field.
+func (r *subscriptionResolver) OrderCreated(ctx context.Context) (<-chan *model.Order, error) {
+	panic(fmt.Errorf("not implemented: OrderCreated - orderCreated"))
 }
 
 // Mutation returns MutationResolver implementation.

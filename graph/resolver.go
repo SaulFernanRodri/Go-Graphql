@@ -3,9 +3,19 @@ package graph
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
-import "go-graphql/graph/model"
+import (
+	"go-graphql/internal/user"
+	"go-graphql/internal/order"
+)
 
 type Resolver struct {
-	Users        []*model.User
-	UserCreated  chan *model.User // Canal de eventos para la suscripción
+	UserResolver  *user.UserResolver
+	OrderResolver *order.OrderResolver
+}
+
+func NewResolver(userResolver *user.UserResolver, orderResolver *order.OrderResolver) *Resolver {
+	return &Resolver{
+		UserResolver:  userResolver,
+		OrderResolver: orderResolver,
+	}
 }

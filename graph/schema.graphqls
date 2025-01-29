@@ -6,6 +6,14 @@ type User {
   activate: Boolean!
 }
 
+type Order {
+  id: ID!
+  user: ID!
+  product: String!
+  quantity: Int!
+  total: Float!
+}
+
 input NewUserInput {
   name: String!
   email: String!
@@ -13,18 +21,31 @@ input NewUserInput {
   activate: Boolean!
 }
 
+input NewOrderInput {
+  user: ID!
+  product: String!
+  quantity: Int!
+  total: Float!
+}
+
 type Query {
   all: [User!]!
   find(id: ID!): User
   findByEmail(email: String!): User
+  allOrders: [Order!]!
+  findOrder(id: ID!): Order
+  findOrderByUser(id: ID!): [Order!]!
 }
 
 type Mutation {
   createUser(input: NewUserInput): User!
   updateUser(id: ID!, name: String!, email: String!): User!
   deleteUser(id: ID!): User!
+  createOrder(input: NewOrderInput): Order!
+  deleteOrder(id: ID!): Order!
 }
 
 type Subscription {
   userCreated: User!
+  orderCreated: Order!
 }
