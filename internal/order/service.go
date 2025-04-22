@@ -28,13 +28,11 @@ func NewOrderService(repo *OrderRepository) *OrderService {
 
 func (s *OrderService) CreateOrder(ctx context.Context, input *model.NewOrderInput) (*model.Order, error) {
 
-	
-
 	order := &model.Order{
-		User: input.User,
-		Product: input.Product,
+		User:     input.User,
+		Product:  input.Product,
 		Quantity: input.Quantity,
-		Total: input.Total,
+		Total:    input.Total,
 	}
 
 	err := s.Repo.Create(ctx, order)

@@ -4,8 +4,8 @@ package graph
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 import (
-	"go-graphql/internal/user"
 	"go-graphql/internal/order"
+	"go-graphql/internal/user"
 )
 
 type Resolver struct {

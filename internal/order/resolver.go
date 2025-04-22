@@ -31,7 +31,6 @@ func (r *OrderResolver) FindByUser(ctx context.Context, userID string) ([]*model
 	return r.Service.GetByUser(ctx, userID)
 }
 
-
 func (r *OrderResolver) DeleteOrder(ctx context.Context, id string) (*model.Order, error) {
 	return r.Service.DeleteOrder(ctx, id)
 }
